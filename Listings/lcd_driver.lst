@@ -1,0 +1,180 @@
+C51 COMPILER V9.60.0.0   LCD_DRIVER                                                        01/25/2023 18:46:08 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE LCD_DRIVER
+OBJECT MODULE PLACED IN .\Objects\lcd_driver.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE lcd_driver.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listing
+                    -s\lcd_driver.lst) TABS(2) OBJECT(.\Objects\lcd_driver.obj)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include "header.h"
+   3          // char i;
+   4          sbit RS = P2 ^ 0;
+   5          sbit RW = P2 ^ 1;
+   6          sbit EN = P2 ^ 2;
+   7          
+   8          /* delay */
+   9          
+  10          void delay(int ms)
+  11          {
+  12   1        unsigned char i;
+  13   1        for (; ms > 0; ms--)
+  14   1        {
+  15   2          for (i = 250; i > 0; i--)
+  16   2            ;
+  17   2      
+  18   2          for (i = 247; i > 0; i--)
+  19   2            ;
+  20   2        }
+  21   1      }
+  22          /* LCD DRIVER */
+  23          void lcd_cmd(unsigned char cmd)
+  24          {
+  25   1        P0 = cmd;
+  26   1        RS = 0;
+  27   1        RW = 0;
+  28   1        EN = 1;
+  29   1        delay(5);
+  30   1        EN = 0;
+  31   1      }
+  32          void lcd_init(void)
+  33          {
+  34   1        EN = 0;
+  35   1        lcd_cmd(0x38);
+  36   1        lcd_cmd(0x01);
+  37   1        lcd_cmd(0x0e);
+  38   1      }
+  39          
+  40          void lcd_data(unsigned char d)
+  41          {
+  42   1        P0 = d;
+  43   1        RS = 1;
+  44   1        RW = 0;
+  45   1        EN = 1;
+  46   1        delay(5);
+  47   1        EN = 0;
+  48   1      }
+  49          void lcd_string(char *p)
+  50          {
+  51   1        while (*p)
+  52   1        {
+  53   2          lcd_data(*p);
+  54   2          p++;
+C51 COMPILER V9.60.0.0   LCD_DRIVER                                                        01/25/2023 18:46:08 PAGE 2   
+
+  55   2        }
+  56   1      }
+  57          
+  58          void lcd_check(void)
+  59          {
+  60   1        char i, j;
+  61   1        // char j;
+  62   1        code char ary[] = "LCD_CHECKING";
+  63   1      
+  64   1        lcd_cmd(0x0c);
+  65   1        for (i = 15; i >= 0; i--) // print till string reach 0x80 add
+  66   1        {
+  67   2          lcd_cmd(0xc0 + i); // start printing from last notch of display
+  68   2          lcd_string(ary);
+  69   2          delay(50);
+  70   2          lcd_cmd(0x01);
+  71   2        }
+  72   1        for (i = 1; i < 17; i++)
+  73   1        {
+  74   2          lcd_cmd(0x01);
+  75   2          lcd_cmd(0x90 - i); // start from last notch of 1st row
+  76   2          for (j = 0; j < i; j++)
+  77   2          {
+  78   3            if (j < 13) // printf till length of string
+  79   3              lcd_data(ary[j]);
+  80   3          }
+  81   2          if (i < 12) // this is for 2nd row
+  82   2          {
+  83   3            lcd_cmd(0xc0);
+  84   3            lcd_string(ary + i); //
+  85   3          }
+  86   2        }
+  87   1        for (i = 1; i < 13; i++) // statting from 0x80
+  88   1        {
+  89   2          lcd_cmd(0x01);
+  90   2          lcd_cmd(0x80);
+  91   2          lcd_string(ary + i); // cut one by one char
+  92   2          delay(50);
+  93   2        }
+  94   1      }
+  95          
+  96          void lcd_int(int d)
+  97          {
+  98   1        unsigned char ary[5];
+  99   1        char i = 0;
+ 100   1        if (d == 0)
+ 101   1        {
+ 102   2          lcd_data('0');
+ 103   2          lcd_data('.');
+ 104   2          lcd_data('0');
+ 105   2          lcd_data('0');
+ 106   2          return;
+ 107   2        }
+ 108   1        if (d < 0)
+ 109   1        {
+ 110   2          d = -d;
+ 111   2          lcd_data('-');
+ 112   2        }
+ 113   1      
+ 114   1        ary[1] = d % 10;
+ 115   1        d = d / 10;
+ 116   1        ary[0] = d;
+C51 COMPILER V9.60.0.0   LCD_DRIVER                                                        01/25/2023 18:46:08 PAGE 3   
+
+ 117   1      
+ 118   1        lcd_data(ary[0] + 48);
+ 119   1        lcd_data(ary[1] + 48);
+ 120   1      }
+ 121          
+ 122          void lcd_float(float d)
+ 123          {
+ 124   1      
+ 125   1        char ary[4], i = 0;
+ 126   1        int x = d;
+ 127   1        float temp = d - x;
+ 128   1        if (d == 0)
+ 129   1        {
+ 130   2          lcd_data('0');
+ 131   2          lcd_data('.');
+ 132   2          lcd_data('0');
+ 133   2          lcd_data('0');
+ 134   2          return;
+ 135   2        }
+ 136   1        while (x)
+ 137   1        {
+ 138   2          ary[i++] = (x % 10) + 48;
+ 139   2          x = x / 10;
+ 140   2        }
+ 141   1        x = temp * 100;
+ 142   1        if (i == 0)
+ 143   1          ary[i++] = '0';
+ 144   1        ary[i] = '.';
+ 145   1        ary[++i] = (x / 10) + 48;
+ 146   1        ary[++i] = (x % 10) + 48;
+ 147   1      
+ 148   1        lcd_data(ary[0]);
+ 149   1        lcd_data(ary[1]);
+ 150   1        lcd_data(ary[2]);
+ 151   1        lcd_data(ary[3]);
+ 152   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    668    ----
+   CONSTANT SIZE    =     13    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      21
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

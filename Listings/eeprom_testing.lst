@@ -1,0 +1,100 @@
+C51 COMPILER V9.60.0.0   EEPROM_TESTING                                                    01/25/2023 18:46:09 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE EEPROM_TESTING
+OBJECT MODULE PLACED IN .\Objects\eeprom_testing.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE eeprom_testing.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Lis
+                    -tings\eeprom_testing.lst) TABS(2) OBJECT(.\Objects\eeprom_testing.obj)
+
+line level    source
+
+   1          #include "header.h"
+   2          
+   3          ///////////////    EEPROM TESTING   /////////////
+   4          
+   5          void eeprom_testing(void)
+   6          {
+   7   1        unsigned char x;
+   8   1        unsigned char temp = 0;
+   9   1      abc:
+  10   1        uart_string("\r\n\r\nConnect SCL To P3.2\r\nConnect SDA To P3.3\r\nConnect EEPROM:-AT24C08 Or M24C08\r\nP
+             -ress ENTER To Start Loopback\r\n");
+  11   1      
+  12   1        x = uart_rxd();
+  13   1      
+  14   1        if (x == '\r')
+  15   1        {
+  16   2          uart_string("\r\nLoopBack Started\r\n(Press ENTER For Come Out Of LoopBack)\r\n");
+  17   2          while (1)
+  18   2          {
+  19   3      
+  20   3            x = uart_rxd();
+  21   3            if (x == '\r')
+  22   3            {
+  23   4              uart_string("\r\n");
+  24   4              goto xyz_;
+  25   4            }
+  26   3            i2c_byte_write(0xA0, 0x10, x);
+  27   3            delay(50);
+  28   3            temp = (unsigned char)i2c_byte_read(0xA0, 0x10);
+  29   3      
+  30   3            uart_txd(temp);
+  31   3            uart_string("\r\nPlease Wait ");
+  32   3            for (temp = 0, x = 5; temp < 6; x--, temp++)
+  33   3            {
+  34   4      
+  35   4              uart_txd(x + 48);
+  36   4              uart_string(" Sec");
+  37   4              delay(1000);
+  38   4              uart_string("\b\b\b\b\b");
+  39   4            }
+  40   3            uart_string("\b\b\b\b\b\b\b\b\b\b\b\b\b");
+  41   3            uart_string("\r\nEnter New Char:\r\n");
+  42   3          }
+  43   2        xyz_:
+  44   2          uart_string("\r\nIs Every Charector Prints Properly (y/n)??\r\n");
+  45   2        xyz:
+  46   2          x = uart_rxd();
+  47   2      
+  48   2          if ((x == 'y') || (x == 'Y'))
+  49   2          {
+  50   3            uart_string("\r\n");
+  51   3            return;
+  52   3          }
+  53   2          else if ((x == 'n') || (x == 'N'))
+C51 COMPILER V9.60.0.0   EEPROM_TESTING                                                    01/25/2023 18:46:09 PAGE 2   
+
+  54   2          {
+  55   3            goto last;
+  56   3          }
+  57   2          else
+  58   2          {
+  59   3            uart_string("\r\nPlease Choose (y/n) Only!!\r\n");
+  60   3            goto xyz;
+  61   3          }
+  62   2        }
+  63   1        else
+  64   1        {
+  65   2          uart_string("\r\nPlease Press Enter Only\r\n");
+  66   2          goto abc;
+  67   2        }
+  68   1      
+  69   1      last:
+  70   1        uart_string("\r\n\r\nMake Sure\r\n1.EEPROM(AT24C08 Or M24C08) Is Available On Board\r\n2.Each Lag Of IC A
+             -re Proper\r\n3.SCL Connected Properly To P3.2\r\n4.SDA Connected Properly To P3.3\r\nAgain");
+  71   1        goto abc;
+  72   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    246    ----
+   CONSTANT SIZE    =    512    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

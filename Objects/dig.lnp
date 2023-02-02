@@ -1,0 +1,9 @@
+".\Objects\gen_function.obj",
+".\Objects\lcd_driver.obj",
+".\Objects\main.obj",
+".\Objects\uart_driver.obj",
+".\Objects\i2c_field.obj",
+".\Objects\eeprom_testing.obj",
+".\Objects\adc_spitestting.obj" 
+TO ".\Objects\dig" 
+PRINT(".\Listings\dig.m51") RAMSIZE(256) 
